@@ -1,0 +1,62 @@
+package dee.moly.warp.game.props
+{
+   import content.Content;
+   import dee.moly.warp.animations.Animation;
+   import dee.moly.warp.animations.DoorAnimation;
+   import dee.moly.warp.game.GameObject;
+   import dee.moly.warp.game.scenery.Warp;
+   import dee.moly.warp.game.states.LevelState;
+   import org.flixel.FlxG;
+   import org.flixel.FlxGroup;
+   public class Door extends GameObject
+   {
+      private var _warps:FlxGroup;
+      public function Door(param1:LevelState)
+      {
+         super(0,0,param1);
+         var _loc2_:Animation = new DoorAnimation();
+         _loc2_.init(this);
+         fixed = true;
+         this._warps = new FlxGroup();
+         _level.add(this._warps);
+      }
+      override public function update() : void
+      {
+         var warp:Warp = null;
+         super.update();
+         if(collide(_level.player))
+         {
+            FlxG.play(Content.WarpExitSound);
+            _level.player.exists = false;
+            warp = new Warp(x - 20,y - 20,_level);
+            warp.addAnimationCallback(function(param1:String, param2:uint, param3:uint):void
+            {
+               if(warp.finished)
+               {
+                  _level.nextLevel();
+               }
+            });
+            this._warps.add(warp);
+         }
+         if(exists && alpha < 1)
+         {
+            alpha = alpha + 0.02;
+         }
+      }
+      public function open() : void
+      {
+         visible = true;
+         solid = true;
+      }
+      public function close() : void
+      {
+         visible = false;
+         solid = false;
+      }
+      override public function reset(param1:Number, param2:Number) : void
+      {
+         super.reset(param1,param2);
+         this._warps.destroy();
+      }
+   }
+}

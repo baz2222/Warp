@@ -1,0 +1,30 @@
+package dee.moly.warp.editor
+{
+   import dee.moly.warp.game.LevelData;
+   import dee.moly.warp.game.states.LevelState;
+   import org.flixel.FlxG;
+   public class PreviewState extends LevelState
+   {
+      public function PreviewState()
+      {
+         super();
+      }
+      override protected function loadLevel(param1:LevelData) : void
+      {
+         super.loadLevel(param1);
+         _levelNameText.text = "Press Q to Exit";
+      }
+      override public function nextLevel() : void
+      {
+         restartLevel();
+      }
+      override protected function handleInput() : void
+      {
+         super.handleInput();
+         if(FlxG.keys.justPressed("Q"))
+         {
+            FlxG.state = new EditorState();
+         }
+      }
+   }
+}

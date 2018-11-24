@@ -1,0 +1,21 @@
+package dee.moly.warp.game.states
+{
+   import dee.moly.warp.game.states.menus.MainMenuState;
+   import org.flixel.FlxG;
+   public class UserLevelState extends LevelState
+   {
+      public function UserLevelState()
+      {
+         super();
+      }
+      override public function nextLevel() : void
+      {
+         FlxG.fade.start(4294967295,2,function():void
+         {
+            FlxG.state = new MainMenuState();
+         });
+         _player.active = false;
+         _player.dead = true;
+      }
+   }
+}

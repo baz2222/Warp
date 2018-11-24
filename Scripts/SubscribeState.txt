@@ -1,0 +1,108 @@
+package dee.moly.warp.game.states
+{
+   import content.Content;
+   import dee.moly.warp.game.states.menus.MainMenuState;
+   import dee.moly.warp.utils.LevelLoader;
+   import dee.moly.warp.utils.ShareBox;
+   import flash.text.TextFieldType;
+   import org.flixel.FlxButton;
+   import org.flixel.FlxG;
+   import org.flixel.FlxSprite;
+   import org.flixel.FlxText;
+   import org.flixel.FlxU;
+   public class SubcribeState extends State
+   {
+      private static const INSTRUCTION_TEXT:String = "Would you like to subscribe to updates from Warp?";
+      private static const DEFAULT_INPUT_TEXT:String = "email";
+      private var _inputField:FlxText;
+      private var _instructionText:FlxText;
+      private var _statusText:FlxText;
+      public function SubcribeState()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         this.createInstructionText();
+         this.createStatusText();
+         this.createInputField();
+         this.createButtons();
+         this.createShareBox();
+         loadLevel(LevelLoader.load(new Content.Menu2JSON()));
+      }
+      private function createInstructionText() : void
+      {
+         this._instructionText = new FlxText(100,60,300,INSTRUCTION_TEXT);
+         this._instructionText.setFormat(null,12,0);
+         add(this._instructionText);
+      }
+      private function createStatusText() : void
+      {
+         this._statusText = new FlxText(190,125,200,"");
+         this._statusText.setFormat(null,12);
+         add(this._statusText);
+      }
+      private function createInputField() : void
+      {
+         this._inputField = new FlxText(95,100,220,null,false);
+         this._inputField.setFormat("Courier",18,0);
+         this._inputField.background = true;
+         this._inputField.type = TextFieldType.INPUT;
+         this._inputField.setHint("email");
+         add(this._inputField);
+         var _loc1_:FlxButton = new FlxButton(325,102,this.onSubmitButtonPressed);
+         _loc1_.loadGraphic(new FlxSprite(0,0,Content.SubmitButton));
+         _loc1_.loadSound(Content.SelectSound);
+         add(_loc1_);
+      }
+      private function createButtons() : void
+      {
+         var _loc1_:FlxButton = new FlxButton(75,150,this.onMenuButtonPressed);
+         _loc1_.loadGraphic(new FlxSprite(0,0,Content.MainMenuButton));
+         _loc1_.loadSound(Content.SelectSound);
+         add(_loc1_);
+         var _loc2_:FlxButton = new FlxButton(275,150,this.onMoreGamesButtonPressed);
+         _loc2_.loadGraphic(new FlxSprite(0,0,Content.MoreGamesButton));
+         _loc2_.loadSound(Content.SelectSound);
+         add(_loc2_);
+      }
+      private function createShareBox() : void
+      {
+         var _loc1_:ShareBox = new ShareBox(320,230,"http://www.kongregate.com/games/GraniteGear/warp-game","Warp");
+         add(_loc1_);
+      }
+      private function onSubmitButtonPressed() : void
+      {
+         if(!this.validateEmail(this._inputField.text))
+         {
+            this._statusText.text = "Invalid Email";
+            this._statusText.color = 16711680;
+            return;
+         }
+         FlxU.openURL("http://www.rypens.be/warp/subscribe.php?email=" + escape(this._inputField.text));
+         this._statusText.text = "Thankyou!";
+         this._statusText.color = 65280;
+      }
+      private function validateEmail(param1:String) : Boolean
+      {
+         if(param1 == null || param1.length <= 0)
+         {
+            return false;
+         }
+         if(param1.indexOf("@") < 0)
+         {
+            return false;
+         }
+         return true;
+      }
+      private function onMenuButtonPressed() : void
+      {
+         FlxG.state = new MainMenuState();
+      }
+      private function onMoreGamesButtonPressed() : void
+      {
+         FlxU.openURL("http://www.subwaypunk.com");
+      }
+   }
+}

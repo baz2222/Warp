@@ -1,0 +1,184 @@
+package dee.moly.warp.game.tasks
+{
+   import content.Content;
+   import dee.moly.warp.editor.PreviewState;
+   import dee.moly.warp.game.states.UserLevelState;
+   import dee.moly.warp.utils.SaveFile;
+   import org.flixel.FlxG;
+   public class TasksTracker
+   {
+      private static var _levelsCompleted:int;
+      private static var _tenLevelsComplete:Boolean;
+      private static var _twentyLevelsComplete:Boolean;
+      private static var _allLevelsComplete:Boolean;
+      private static var _enemiesKilled:int;
+      private static var _fiveEnemiesKilled:Boolean;
+      private static var _tenEnemiesKilled:Boolean;
+      private static var _twentyEnemiesKilled:Boolean;
+      private static var _timesWarped:int;
+      private static var _warpedThirtyTimes:Boolean;
+      private static var _warpedSixtyTimes:Boolean;
+      private static var _warped120Times:Boolean;
+      private static var _timesDied:int;
+      private static var _diedFiveTimes:Boolean;
+      private static var _diedTenTimes:Boolean;
+      private static var _diedTwentyTimes:Boolean;
+      public static var visible:Boolean = true;
+      public function TasksTracker()
+      {
+         super();
+      }
+      public static function get levelsCompleted() : int
+      {
+         return _levelsCompleted;
+      }
+      public static function set levelsCompleted(param1:int) : void
+      {
+         if(FlxG.state is PreviewState || FlxG.state is UserLevelState)
+         {
+            return;
+         }
+         _levelsCompleted = param1;
+         SaveFile.levelsCompleted = _levelsCompleted;
+         if(_levelsCompleted >= 10 && !_tenLevelsComplete)
+         {
+            _tenLevelsComplete = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.NotBad));
+            }
+         }
+         if(_levelsCompleted >= 20 && !_twentyLevelsComplete)
+         {
+            _twentyLevelsComplete = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.Great));
+            }
+         }
+         if(_levelsCompleted >= 30 && !_allLevelsComplete)
+         {
+            _allLevelsComplete = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.Awesome));
+            }
+         }
+         FlxG.portalAPI.submitStat("levelsCompleted",_levelsCompleted);
+      }
+      public static function get enemiesKilled() : int
+      {
+         return _enemiesKilled;
+      }
+      public static function set enemiesKilled(param1:int) : void
+      {
+         if(FlxG.state is PreviewState || FlxG.state is UserLevelState)
+         {
+            return;
+         }
+         _enemiesKilled = param1;
+         SaveFile.enemiesKilled = _enemiesKilled;
+         if(_enemiesKilled >= 5 && !_fiveEnemiesKilled)
+         {
+            _fiveEnemiesKilled = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.Fighter));
+            }
+         }
+         if(_enemiesKilled >= 10 && !_tenEnemiesKilled)
+         {
+            _tenEnemiesKilled = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.Warrior));
+            }
+         }
+         if(_enemiesKilled >= 20 && !_twentyEnemiesKilled)
+         {
+            _twentyEnemiesKilled = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.Warlord));
+            }
+         }
+         FlxG.portalAPI.submitStat("enemiesKilled",_enemiesKilled);
+      }
+      public static function get timesWarped() : int
+      {
+         return _timesWarped;
+      }
+      public static function set timesWarped(param1:int) : void
+      {
+         if(FlxG.state is PreviewState || FlxG.state is UserLevelState)
+         {
+            return;
+         }
+         _timesWarped = param1;
+         SaveFile.timesWarped = _timesWarped;
+         if(_timesWarped >= 30 && !_warpedThirtyTimes)
+         {
+            _warpedThirtyTimes = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.Warper));
+            }
+         }
+         if(_timesWarped >= 60 && !_warpedSixtyTimes)
+         {
+            _warpedSixtyTimes = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.Warpalot));
+            }
+         }
+         if(_timesWarped >= 120 && !_warped120Times)
+         {
+            _warped120Times = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.Nator));
+            }
+         }
+         FlxG.portalAPI.submitStat("timesWarped",_timesWarped);
+      }
+      public static function get timesDied() : int
+      {
+         return _timesDied;
+      }
+      public static function set timesDied(param1:int) : void
+      {
+         if(FlxG.state is PreviewState || FlxG.state is UserLevelState)
+         {
+            return;
+         }
+         _timesDied = param1;
+         SaveFile.timesDied = _timesDied;
+         if(_timesDied >= 5 && !_diedFiveTimes)
+         {
+            _diedFiveTimes = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.TooBad));
+            }
+         }
+         if(_timesDied >= 10 && !_diedTenTimes)
+         {
+            _diedTenTimes = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.Weak));
+            }
+         }
+         if(_timesDied >= 20 && !_diedTwentyTimes)
+         {
+            _diedTwentyTimes = true;
+            if(visible)
+            {
+               FlxG.state.add(new Task(Content.Punch));
+            }
+         }
+         FlxG.portalAPI.submitStat("timesDied",_timesDied);
+      }
+   }
+}

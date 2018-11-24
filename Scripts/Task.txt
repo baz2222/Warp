@@ -1,0 +1,46 @@
+package dee.moly.warp.game.tasks
+{
+   import content.Content;
+   import org.flixel.FlxG;
+   import org.flixel.FlxSprite;
+   public class Task extends FlxSprite
+   {
+      private var _stage:int;
+      private var _counter:int;
+      public function Task(param1:Class)
+      {
+         super(400,0,param1);
+         x = FlxG.width - width - 10;
+         y = -height;
+         FlxG.play(Content.TaskSound);
+      }
+      override public function update() : void
+      {
+         super.update();
+         if(this._stage == 0)
+         {
+            y++;
+            if(y >= 0)
+            {
+               this._stage++;
+            }
+         }
+         else if(this._stage == 1)
+         {
+            this._counter++;
+            if(this._counter > 60)
+            {
+               this._stage++;
+            }
+         }
+         else
+         {
+            y--;
+            if(y < -height)
+            {
+               exists = false;
+            }
+         }
+      }
+   }
+}

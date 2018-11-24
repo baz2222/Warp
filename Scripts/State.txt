@@ -1,0 +1,94 @@
+package dee.moly.warp.game.states
+{
+   import content.Content;
+   import dee.moly.warp.game.LevelData;
+   import dee.moly.warp.game.scenery.Tilemap;
+   import org.flixel.FlxButton;
+   import org.flixel.FlxG;
+   import org.flixel.FlxGroup;
+   import org.flixel.FlxSprite;
+   import org.flixel.FlxState;
+   public class State extends FlxState
+   {
+      protected static const _plant1Graphics:Array = [Content.Tree1,Content.Fungus1,Content.Rose1];
+      protected static const _plant2Graphics:Array = [Content.Tree2,Content.Fungus2,Content.Rose2];
+      protected static const _backgrounds:Array = [Content.BGGreen,Content.BGBlue,Content.BGRed];
+      protected static const _grass:Array = [Content.Grass,Content.Shrooms,Content.Vines];
+      protected static const _lumps:Array = [Content.Lumps,Content.Lumps2,Content.Lumps3];
+      protected static const _musics:Array = [Content.GreenMusic,Content.BlueMusic,Content.RedMusic];
+      protected var _world:int;
+      protected var _background:FlxSprite;
+      protected var _tilemap:Tilemap;
+      protected var _scenery:FlxGroup;
+      protected var _overlay:FlxSprite;
+      protected var _backButton:FlxButton;
+      public function State()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         this._background = new FlxSprite();
+         add(this._background);
+         this._tilemap = new Tilemap();
+         add(this._tilemap);
+         this._scenery = new FlxGroup();
+         add(this._scenery);
+         this._overlay = new FlxSprite();
+         add(this._overlay);
+      }
+      protected function loadLevel(param1:LevelData) : void
+      {
+         this._world = param1.world;
+         this._background.loadGraphic(_backgrounds[this._world]);
+         this.loadTilemap(param1);
+         this.loadScenery(param1);
+         this.loadOverlay(param1);
+         FlxG.flash.start(4294967295,2);
+      }
+      protected function loadTilemap(param1:LevelData) : void
+      {
+         this._tilemap.loadMap(param1.tilemap,Content.Tiles,FlxG.width / Tilemap.TILE_WIDTH);
+         this._tilemap.setGrassGraphic(_grass[this._world]);
+         this._tilemap.setLumpsGraphic(_lumps[this._world]);
+      }
+      protected function loadScenery(param1:LevelData) : void
+      {
+         var _loc2_:Object = null;
+         this._scenery.destroy();
+         for each(_loc2_ in param1.plant1s)
+         {
+            this._scenery.add(new FlxSprite(_loc2_.x,_loc2_.y,_plant1Graphics[this._world]));
+         }
+         for each(_loc2_ in param1.plant2s)
+         {
+            this._scenery.add(new FlxSprite(_loc2_.x,_loc2_.y,_plant2Graphics[this._world]));
+         }
+      }
+      protected function loadOverlay(param1:LevelData) : void
+      {
+         var levelData:LevelData = param1;
+         if(levelData.tutorialImage != "")
+         {
+            this._overlay.exists = true;
+            try
+            {
+               this._overlay.loadGraphic(Content[levelData.tutorialImage]);
+            }
+            catch(e:Error)
+            {
+               _overlay.exists = false;
+            }
+            this._overlay.x = levelData.tutorialPos.x;
+            this._overlay.y = levelData.tutorialPos.y;
+            defaultGroup.remove(this._overlay,true);
+            add(this._overlay);
+         }
+         else
+         {
+            this._overlay.exists = false;
+         }
+      }
+   }
+}

@@ -1,0 +1,30 @@
+package dee.moly.warp.game.states
+{
+   import content.Content;
+   import dee.moly.warp.game.states.menus.MainMenuState;
+   import org.flixel.FlxButton;
+   import org.flixel.FlxG;
+   import org.flixel.FlxSprite;
+   public class ExitableState extends State
+   {
+      protected var _exitState:Class;
+      public function ExitableState()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         this._exitState = MainMenuState;
+         var _loc1_:FlxSprite = new FlxSprite(0,0,Content.MiniBackButton);
+         _backButton = new FlxButton(FlxG.width - _loc1_.width,FlxG.height - _loc1_.height,this.onBackButtonPressed);
+         _backButton.loadGraphic(_loc1_);
+         _backButton.loadSound(Content.SelectSound);
+         add(_backButton);
+      }
+      private function onBackButtonPressed() : void
+      {
+         FlxG.state = new this._exitState();
+      }
+   }
+}

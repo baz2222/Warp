@@ -1,0 +1,63 @@
+package dee.moly.warp.game.states.menus
+{
+   import content.Content;
+   import dee.moly.warp.game.states.ExitableState;
+   import dee.moly.warp.game.states.LevelState;
+   import dee.moly.warp.utils.LevelLoader;
+   import dee.moly.warp.utils.SaveFile;
+   import org.flixel.FlxButton;
+   import org.flixel.FlxG;
+   import org.flixel.FlxSprite;
+   public class PlayMenuState extends ExitableState
+   {
+      public function PlayMenuState()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         FlxG.mouse.show();
+         this.createButtons();
+         loadLevel(LevelLoader.load(new Content.Menu2JSON()));
+      }
+      private function createButtons() : void
+      {
+         var _loc1_:FlxButton = new FlxButton(100,100,this.onNewGameButtonPressed);
+         _loc1_.loadGraphic(new FlxSprite(0,0,Content.NewGameButton));
+         _loc1_.loadSound(Content.SelectSound);
+         add(_loc1_);
+         var _loc2_:FlxButton = new FlxButton(290,100,this.onLoadGameButtonPressed);
+         _loc2_.loadGraphic(new FlxSprite(0,0,Content.LoadGameButton));
+         _loc2_.loadSound(Content.SelectSound);
+         add(_loc2_);
+      }
+      private function onNewGameButtonPressed() : void
+      {
+         SaveFile.currentLevel = FlxG.level = 0;
+         this.startGame();
+      }
+      private function onLoadGameButtonPressed() : void
+      {
+         FlxG.level = SaveFile.currentLevel;
+         this.startGame();
+      }
+      private function startGame() : void
+      {
+         var i:int = 0;
+         try
+         {
+            i = 1;
+            while(i <= 33)
+            {
+               FlxG.levels.push(LevelLoader.load(new Content["Level" + i + "JSON"]()));
+               i++;
+            }
+         }
+         catch(e:Error)
+         {
+         }
+         FlxG.state = new LevelState();
+      }
+   }
+}

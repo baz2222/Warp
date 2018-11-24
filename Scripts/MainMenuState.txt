@@ -1,0 +1,119 @@
+package dee.moly.warp.game.states.menus
+{
+   import content.Content;
+   import dee.moly.warp.game.LevelData;
+   import dee.moly.warp.game.states.State;
+   import dee.moly.warp.game.states.UserLevelState;
+   import dee.moly.warp.game.tasks.TasksState;
+   import dee.moly.warp.utils.LevelLoader;
+   import flash.utils.ByteArray;
+   import org.flixel.FlxButton;
+   import org.flixel.FlxG;
+   import org.flixel.FlxSprite;
+   import org.flixel.FlxText;
+   import org.flixel.FlxU;
+   public class MainMenuState extends State
+   {
+      public function MainMenuState()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         FlxG.mouse.show();
+         FlxG.levels = [];
+         if(!FlxG.portalAPI.isConnected())
+         {
+            FlxG.portalAPI.addSharedContentListener("Level",this.onLevelLoaded);
+         }
+         this.createButtons();
+         var _loc1_:FlxText = new FlxText(FlxG.width - 90 - 16,240,90,"Press m to mute");
+         add(_loc1_);
+         loadLevel(LevelLoader.load(new Content.Menu1JSON()));
+         FlxG.playMusic(Content.MenuTheme,0.8);
+      }
+      private function createButtons() : void
+      {
+         var _loc1_:FlxButton = null;
+         var _loc2_:FlxButton = null;
+         var _loc4_:FlxButton = null;
+         _loc1_ = new FlxButton(0,140,this.onPlayButtonPressed);
+         _loc1_.loadGraphic(new FlxSprite(0,0,Content.PlayButton));
+         _loc1_.x = FlxG.width * 0.2 - _loc1_.width / 2;
+         _loc1_.loadSound(Content.SelectSound);
+         add(_loc1_);
+         _loc2_ = new FlxButton(0,140,this.onUserLevelsButtonPressed);
+         _loc2_.loadGraphic(new FlxSprite(0,0,Content.UserLevelsButton));
+         _loc2_.x = FlxG.width * 0.5 - _loc2_.width / 2;
+         _loc2_.loadSound(Content.SelectSound);
+         add(_loc2_);
+         var _loc3_:FlxButton = new FlxButton(0,140,this.onTasksButtonPressed);
+         _loc3_.loadGraphic(new FlxSprite(0,0,Content.TasksButton));
+         _loc3_.x = FlxG.width * 0.8 - _loc3_.width / 2;
+         _loc3_.loadSound(Content.SelectSound);
+         add(_loc3_);
+         _loc4_ = new FlxButton(0,180,this.onMoreGamesButtonPressed);
+         _loc4_.loadGraphic(new FlxSprite(0,0,Content.MoreGamesButton));
+         _loc4_.x = FlxG.width * 0.2 - _loc4_.width / 2;
+         _loc4_.loadSound(Content.SelectSound);
+         add(_loc4_);
+         var _loc5_:FlxButton = new FlxButton(0,180,this.onFacebookButtonPressed);
+         _loc5_.loadGraphic(new FlxSprite(0,0,Content.FacebookButton));
+         _loc5_.x = FlxG.width * 0.5 - _loc5_.width / 2;
+         _loc5_.loadSound(Content.SelectSound);
+         add(_loc5_);
+      }
+      private function onPlayButtonPressed() : void
+      {
+         FlxG.state = new PlayMenuState();
+      }
+      private function onTasksButtonPressed() : void
+      {
+         FlxG.state = new TasksState();
+      }
+      private function onUserLevelsButtonPressed() : void
+      {
+         FlxG.state = new UserLevelsMenuState();
+      }
+      private function onMoreGamesButtonPressed() : void
+      {
+         FlxU.openURL("http://www.subwaypunk.com");
+      }
+      private function onFacebookButtonPressed() : void
+      {
+         FlxU.openURL("http://www.facebook.com/pages/Warp-Game/222557917773479");
+      }
+      override public function update() : void
+      {
+         super.update();
+         if(!FlxG.portalAPI.isConnected())
+         {
+            FlxG.portalAPI.initialise(parent);
+         }
+      }
+      private function onLevelLoaded(param1:Object) : void
+      {
+         var levelData:LevelData = null;
+         var byteArray:ByteArray = null;
+         var params:Object = param1;
+         try
+         {
+            byteArray = Base64.decode(params.content);
+            byteArray.uncompress();
+            levelData = LevelLoader.load(byteArray.toString());
+            levelData.name = params.name;
+         }
+         catch(e:Error)
+         {
+         }
+         if(levelData != null)
+         {
+            FlxG.level = 0;
+            FlxG.levels = [];
+            FlxG.levels[0] = levelData;
+            FlxG.state = new UserLevelState();
+         }
+      }
+   }
+}

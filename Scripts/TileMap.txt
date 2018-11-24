@@ -1,0 +1,126 @@
+package dee.moly.warp.game.scenery
+{
+   import org.flixel.FlxGroup;
+   import org.flixel.FlxTilemap;
+   public class Tilemap extends FlxGroup
+   {
+      public static const TILE_WIDTH:int = 16;
+      public static const TILE_HEIGHT:int = 16;
+      public static const EMPTY_TILE:int = 0;
+      public static const SPIKE_TILE:int = 1;
+      public static const ENEMY_BLOCK:int = 2;
+      public static const PLATFORM_TILE:int = 3;
+      public static const CRUMBLE_TILE:int = 4;
+      private var _platformMap:FlxTilemap;
+      private var _grassMap:FlxTilemap;
+      private var _vineMap:FlxTilemap;
+      public function Tilemap()
+      {
+         super();
+         this._platformMap = new FlxTilemap();
+         add(this._platformMap);
+         this._grassMap = new FlxTilemap();
+         this._grassMap.solid = false;
+         add(this._grassMap);
+         this._vineMap = new FlxTilemap();
+         this._vineMap.solid = false;
+         add(this._vineMap);
+         this._platformMap.collideIndex = 3;
+      }
+      public function loadMap(param1:Array, param2:Class, param3:int) : void
+      {
+         this._platformMap.loadMap(FlxTilemap.arrayToCSV(param1,param3),param2);
+         var _loc4_:int = 0;
+         while(_loc4_ < this._platformMap.totalTiles)
+         {
+            this.updateTile(_loc4_ % param3,_loc4_ / param3);
+            _loc4_++;
+         }
+      }
+      public function setGrassGraphic(param1:Class) : void
+      {
+         var _loc2_:Array = new Array(510);
+         this._grassMap.loadMap(FlxTilemap.arrayToCSV(_loc2_,this._platformMap.widthInTiles),param1);
+         var _loc3_:int = 0;
+         while(_loc3_ < this._platformMap.totalTiles)
+         {
+            this.updateTile(_loc3_ % this._platformMap.widthInTiles,_loc3_ / this._platformMap.widthInTiles);
+            _loc3_++;
+         }
+      }
+      public function setLumpsGraphic(param1:Class) : void
+      {
+         var _loc2_:Array = new Array(510);
+         this._vineMap.loadMap(FlxTilemap.arrayToCSV(_loc2_,this._platformMap.widthInTiles),param1,16,16);
+         var _loc3_:int = 0;
+         while(_loc3_ < this._platformMap.totalTiles)
+         {
+            this.updateTile(_loc3_ % this._platformMap.widthInTiles,_loc3_ / this._platformMap.widthInTiles);
+            _loc3_++;
+         }
+      }
+      public function getTileByIndex(param1:int) : int
+      {
+         return this._platformMap.getTileByIndex(param1);
+      }
+      public function get totalTiles() : int
+      {
+         return this._platformMap.totalTiles;
+      }
+      public function setTile(param1:int, param2:int, param3:int) : void
+      {
+         if(param3 == CRUMBLE_TILE)
+         {
+            this._platformMap.setTile(param1,param2,param1 % 3 + Tilemap.CRUMBLE_TILE);
+         }
+         else
+         {
+            this._platformMap.setTile(param1,param2,param3);
+         }
+         this._grassMap.setTile(param1,param2,EMPTY_TILE);
+         this._grassMap.setTile(param1,param2 - 1,EMPTY_TILE);
+         this._vineMap.setTile(param1,param2,EMPTY_TILE);
+         this._vineMap.setTile(param1,param2 + 1,EMPTY_TILE);
+         this._vineMap.setTile(param1,param2 + 2,EMPTY_TILE);
+         var _loc4_:int = 0;
+         while(_loc4_ < this._platformMap.totalTiles)
+         {
+            this.updateTile(_loc4_ % this._platformMap.widthInTiles,_loc4_ / this._platformMap.widthInTiles);
+            _loc4_++;
+         }
+      }
+      public function getTile(param1:int, param2:int) : int
+      {
+         return this._platformMap.getTile(param1,param2);
+      }
+      public function get widthInTiles() : int
+      {
+         return this._platformMap.widthInTiles;
+      }
+      public function get heightInTiles() : int
+      {
+         return this._platformMap.heightInTiles;
+      }
+      public function updateTile(param1:int, param2:int) : void
+      {
+         if(this._platformMap.getTile(param1,param2) != PLATFORM_TILE)
+         {
+            return;
+         }
+         this._grassMap.setTile(param1,param2,EMPTY_TILE);
+         this._vineMap.setTile(param1,param2,EMPTY_TILE);
+         if(this._platformMap.getTile(param1,param2 - 1) == EMPTY_TILE)
+         {
+            this._grassMap.setTile(param1,param2 - 1,param1 % 4 + 1);
+         }
+         if(this._platformMap.getTile(param1,param2 + 1) != PLATFORM_TILE)
+         {
+            this._vineMap.setTile(param1,param2 + 1,param1 % 8 + 1);
+         }
+         if(this._platformMap.getTile(param1,param2 + 2) != PLATFORM_TILE)
+         {
+            this._vineMap.setTile(param1,param2 + 2,param1 % 8 + 9);
+         }
+      }
+   }
+}

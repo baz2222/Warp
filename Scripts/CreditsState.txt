@@ -1,0 +1,80 @@
+package dee.moly.warp.game.states
+{
+   import content.Content;
+   import dee.moly.warp.utils.LevelLoader;
+   import dee.moly.warp.utils.Timer;
+   import org.flixel.FlxG;
+   import org.flixel.FlxGroup;
+   import org.flixel.FlxText;
+   public class CreditsState extends State
+   {
+      private static const DISPLAY_TIME:int = 2000;
+      private var _credits:FlxGroup;
+      private var _timer:Timer;
+      public function CreditsState()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         this.createCreditsText();
+         loadLevel(LevelLoader.load(new Content.Menu2JSON()));
+         FlxG.playMusic(Content.CreditsMusic);
+      }
+      private function createCreditsText() : void
+      {
+         this._credits = new FlxGroup();
+         add(this._credits);
+         var _loc1_:FlxText = new FlxText(180,0,90,"A game by:");
+         _loc1_.setFormat(null,10,0);
+         var _loc2_:FlxText = new FlxText(210,30,90,"Granite Gear");
+         _loc2_.setFormat(null,10,0);
+         var _loc3_:FlxText = new FlxText(210,43,90,"Aidan Rypens");
+         _loc3_.setFormat(null,10,0);
+         var _loc4_:FlxText = new FlxText(210,56,90,"moly");
+         _loc4_.setFormat(null,10,0);
+         var _loc5_:FlxText = new FlxText(180,90,150,"Additional art:");
+         _loc5_.setFormat(null,10,0);
+         var _loc6_:FlxText = new FlxText(210,120,90,"Linda Smith");
+         _loc6_.setFormat(null,10,0);
+         var _loc7_:FlxText = new FlxText(180,160,90,"Music by:");
+         _loc7_.setFormat(null,10,0);
+         var _loc8_:FlxText = new FlxText(210,190,90,"Maverlyn");
+         _loc8_.setFormat(null,10,0);
+         var _loc9_:FlxText = new FlxText(210,203,150,"HalcyonicFalconX");
+         _loc9_.setFormat(null,10,0);
+         var _loc10_:FlxText = new FlxText(180,240,90,"PHP by:");
+         _loc10_.setFormat(null,10,0);
+         var _loc11_:FlxText = new FlxText(210,270,90,"Daan Smits");
+         _loc11_.setFormat(null,10,0);
+         var _loc12_:FlxText = new FlxText(180,310,120,"Sponsored by:");
+         _loc12_.setFormat(null,10,0);
+         var _loc13_:FlxText = new FlxText(210,340,90,"Subwaypunk");
+         _loc13_.setFormat(null,10,0);
+         var _loc14_:FlxText = new FlxText(170,470,150,"Thankyou for playing!");
+         _loc14_.setFormat(null,10,0);
+this._credits.members.push(_loc1_,_loc2_,_loc3_,_loc4_,_loc5_,_loc6_,_loc7_,_loc8_,_loc9_,_loc10_,_loc11_,_loc12_,_loc13_,_loc14_);
+         this._credits.height = _loc14_.y;
+         this._credits.y = FlxG.height;
+         this._credits.velocity.y = -20;
+      }
+      override public function update() : void
+      {
+         super.update();
+         if(this._credits.y <= -(this._credits.height - FlxG.height / 2))
+         {
+            this._credits.velocity.y = 0;
+            if(this._timer == null)
+            {
+               this._timer = new Timer(DISPLAY_TIME,this.onTimerEvent);
+               add(this._timer);
+            }
+         }
+      }
+      private function onTimerEvent() : void
+      {
+         FlxG.state = new SubcribeState();
+      }
+   }
+}

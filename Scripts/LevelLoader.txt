@@ -1,0 +1,16 @@
+package dee.moly.warp.utils
+{
+   import dee.moly.warp.game.LevelData;
+   public class LevelLoader
+   {
+      public function LevelLoader()
+      {
+         super();
+      }
+      public static function load(param1:String) : LevelData
+      {
+         var _loc2_:Object = com.adobe.serialization.json.JSON.decode(param1);
+         return new LevelData(_loc2_);
+      }
+   }
+}

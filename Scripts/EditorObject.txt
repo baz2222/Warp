@@ -1,0 +1,52 @@
+package dee.moly.warp.editor
+{
+   import dee.moly.warp.animations.Animation;
+   import org.flixel.FlxG;
+   import org.flixel.FlxSprite;
+   public class EditorObject extends FlxSprite
+   {
+      public var dragging:Boolean;
+      public var deleteable:Boolean;
+      private var _editor:EditorState;
+      public function EditorObject(param1:Animation, param2:EditorState, param3:int = 0, param4:int = 0)
+      {
+         super(param3,param4);
+         this._editor = param2;
+         param1.init(this);
+         this.deleteable = true;
+      }
+      override public function update() : void
+      {
+         super.update();
+         if(this.dragging)
+         {
+            x = FlxG.mouse.screenX - width / 2;
+            y = FlxG.mouse.screenY - height / 2;
+         }
+         else if(!this._editor.mouseEventHandled && FlxG.mouse.justPressed())
+         {
+            if(overlapsPoint(FlxG.mouse.x,FlxG.mouse.y))
+            {
+               if(this._editor.deleteMode)
+               {
+                  if(this.deleteable)
+                  {
+                     exists = false;
+                  }
+                  this._editor.deleteMode = false;
+                  FlxG.mouse.unload();
+               }
+               else
+               {
+                  this.dragging = true;
+               }
+               this._editor.mouseEventHandled = true;
+            }
+         }
+         if(FlxG.mouse.justReleased())
+         {
+            this.dragging = false;
+         }
+      }
+   }
+}

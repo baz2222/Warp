@@ -1,0 +1,53 @@
+package dee.moly.warp.game.states.menus
+{
+   import content.Content;
+   import dee.moly.warp.editor.EditorState;
+   import dee.moly.warp.game.states.ExitableState;
+   import dee.moly.warp.utils.LevelLoader;
+   import org.flixel.FlxButton;
+   import org.flixel.FlxG;
+   import org.flixel.FlxSprite;
+   public class UserLevelsMenuState extends ExitableState
+   {
+      public function UserLevelsMenuState()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         FlxG.mouse.show();
+         this.createButtons();
+         loadLevel(LevelLoader.load(new Content.Menu2JSON()));
+      }
+      private function createButtons() : void
+      {
+         var _loc1_:FlxButton = new FlxButton(100,100,this.onBrowseButtonPressed);
+         _loc1_.loadGraphic(new FlxSprite(0,0,Content.LoadLevelButton));
+         _loc1_.loadSound(Content.SelectSound);
+         add(_loc1_);
+         var _loc2_:FlxButton = new FlxButton(290,100,this.onCreateButtonPressed);
+         _loc2_.loadGraphic(new FlxSprite(0,0,Content.CreateLevelButton));
+         _loc2_.loadSound(Content.SelectSound);
+         add(_loc2_);
+      }
+      private function onBrowseButtonPressed() : void
+      {
+         try
+         {
+            FlxG.portalAPI.browseSharedContent("Level");
+            return;
+         }
+         catch(e:Error)
+         {
+            return;
+         }
+      }
+      private function onCreateButtonPressed() : void
+      {
+         FlxG.level = 0;
+         FlxG.levels[0] = LevelLoader.load(new Content.Level0JSON());
+         FlxG.state = new EditorState();
+      }
+   }
+}

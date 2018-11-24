@@ -1,0 +1,185 @@
+package dee.moly.warp.game.states
+{
+   import dee.moly.warp.game.LevelData;
+   import dee.moly.warp.game.actors.Player;
+   import dee.moly.warp.game.actors.SpikeEnemy;
+   import dee.moly.warp.game.actors.StandardEnemy;
+   import dee.moly.warp.game.props.BuffBomb;
+   import dee.moly.warp.game.props.BuffJump;
+   import dee.moly.warp.game.props.BuffShield;
+   import dee.moly.warp.game.props.Bump;
+   import dee.moly.warp.game.props.Door;
+   import dee.moly.warp.game.props.Switch;
+   import dee.moly.warp.game.scenery.Tilemap;
+   import dee.moly.warp.game.tasks.TasksTracker;
+   import dee.moly.warp.utils.SaveFile;
+   import org.flixel.FlxG;
+   import org.flixel.FlxGroup;
+   import org.flixel.FlxText;
+   public class LevelState extends State
+   {
+      protected var _levelNameText:FlxText;
+      protected var _player:Player;
+      protected var _door:Door;
+      private var _enemies:FlxGroup;
+      private var _switches:FlxGroup;
+      private var _bumps:FlxGroup;
+      private var _buffs:FlxGroup;
+      private var _lastWorld:int;
+      public function LevelState()
+      {
+         super();
+      }
+      public function get tilemap() : Tilemap
+      {
+         return _tilemap;
+      }
+      public function get player() : Player
+      {
+         return this._player;
+      }
+      public function set player(param1:Player) : void
+      {
+         this._player = param1;
+      }
+      public function get door() : Door
+      {
+         return this._door;
+      }
+      public function set door(param1:Door) : void
+      {
+         this._door = param1;
+      }
+      public function get scenery() : FlxGroup
+      {
+         return _scenery;
+      }
+      override public function create() : void
+      {
+         super.create();
+         FlxG.mouse.hide();
+         _world = -1;
+         this._door = new Door(this);
+         add(this._door);
+         this._switches = new FlxGroup();
+         add(this._switches);
+         this._bumps = new FlxGroup();
+         add(this._bumps);
+         this._buffs = new FlxGroup();
+         add(this._buffs);
+         this._enemies = new FlxGroup();
+         add(this._enemies);
+         this._player = new Player(this);
+         add(this._player);
+         this._levelNameText = new FlxText(0,0,140,null,false);
+         this._levelNameText.setFormat("Arial Bold",16);
+         add(this._levelNameText);
+         this.loadLevel(FlxG.levels[FlxG.level]);
+      }
+      override protected function loadLevel(param1:LevelData) : void
+      {
+         var _loc2_:Object = null;
+         this._lastWorld = _world;
+         super.loadLevel(param1);
+         if(_world != this._lastWorld)
+         {
+            FlxG.playMusic(_musics[_world]);
+         }
+         this._player.reset(param1.start.x,param1.start.y);
+         this._door.reset(param1.exit.x,param1.exit.y);
+         this._switches.destroy();
+         for each(_loc2_ in param1.switches)
+         {
+            this._switches.add(new Switch(_loc2_.x,_loc2_.y,this));
+         }
+         this._enemies.destroy();
+         for each(_loc2_ in param1.enemies)
+         {
+            this._enemies.add(new StandardEnemy(_loc2_.x,_loc2_.y,this));
+         }
+         for each(_loc2_ in param1.spikeEnemies)
+         {
+            this._enemies.add(new SpikeEnemy(_loc2_.x,_loc2_.y,this));
+         }
+         this._bumps.destroy();
+         for each(_loc2_ in param1.bumps)
+         {
+            this._bumps.add(new Bump(_loc2_.x,_loc2_.y,this));
+         }
+         this._buffs.destroy();
+         for each(_loc2_ in param1.buffBombs)
+         {
+            this._buffs.add(new BuffBomb(_loc2_.x,_loc2_.y,this));
+         }
+         for each(_loc2_ in param1.buffJumps)
+         {
+            this._buffs.add(new BuffJump(_loc2_.x,_loc2_.y,this));
+         }
+         for each(_loc2_ in param1.buffShields)
+         {
+            this._buffs.add(new BuffShield(_loc2_.x,_loc2_.y,this));
+         }
+         if(param1.name == "")
+         {
+            this._levelNameText.text = "Level " + (FlxG.level + 1);
+         }
+         else
+         {
+            this._levelNameText.text = param1.name;
+         }
+         if(FlxG.level == 22)
+         {
+            this._door.exists = false;
+            this._door.alpha = 0;
+         }
+      }
+      override public function update() : void
+      {
+         super.update();
+         this.handleInput();
+      }
+      public function getTile(param1:int, param2:int) : int
+      {
+         return _tilemap.getTile(param1,param2);
+      }
+      public function restartLevel() : void
+      {
+         this.loadLevel(FlxG.levels[FlxG.level]);
+      }
+      public function nextLevel() : void
+      {
+         FlxG.level++;
+         if(FlxG.level > TasksTracker.levelsCompleted)
+         {
+            TasksTracker.levelsCompleted = FlxG.level;
+         }
+         if(FlxG.level >= FlxG.levels.length)
+         {
+            FlxG.fade.start(4294967295,4,function():void
+            {
+               FlxG.state = new CreditsState();
+            });
+            this._player.active = false;
+            this._player.dead = true;
+         }
+         else
+         {
+            this.loadLevel(FlxG.levels[FlxG.level]);
+         }
+         if(FlxG.level > SaveFile.currentLevel)
+         {
+            if(FlxG.level < FlxG.levels.length)
+            {
+               SaveFile.currentLevel = FlxG.level;
+            }
+         }
+      }
+      protected function handleInput() : void
+      {
+         if(FlxG.keys.justPressed("R"))
+         {
+            this.restartLevel();
+         }
+      }
+   }
+}

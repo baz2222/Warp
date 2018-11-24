@@ -1,0 +1,122 @@
+package dee.moly.warp.game.actors
+{
+   import content.Content;
+   import dee.moly.warp.game.GameObject;
+   import dee.moly.warp.game.scenery.Warp;
+   import dee.moly.warp.game.states.LevelState;
+   import org.flixel.FlxG;
+   import org.flixel.FlxGroup;
+   import org.flixel.FlxSound;
+   public class Actor extends GameObject
+   {
+      public static const RUN_SPEED:int = 170;
+      public static const JUMP_POWER:Number = 350;
+      public static const GRAVITY:Number = 1300;
+      protected static const WALKING_ANIMATION:String = "walking";
+      protected static const FALLING_ANIMATION:String = "falling";
+      protected static const JUMPING_ANIMATION:String = "jumping";
+      protected static const STANDING_ANIMATION:String = "standing";
+      protected static const DIEING_ANIMATION:String = "dieing";
+      private var _stepSound:FlxSound;
+      private var _warps:FlxGroup;
+      public function Actor(param1:int, param2:int, param3:LevelState)
+      {
+         super(param1,param2,param3);
+         acceleration.y = GRAVITY;
+         maxVelocity.y = JUMP_POWER * 1.5;
+         this._stepSound = new FlxSound();
+         this._warps = new FlxGroup();
+         _level.add(this._warps);
+      }
+      override public function update() : void
+      {
+         super.update();
+         this.updateCollisions();
+         this.handleInput();
+         this.updateGraphics();
+      }
+      protected function updateCollisions() : void
+      {
+         if(dead)
+         {
+            return;
+         }
+         collide(_level.tilemap);
+         if(x <= 0 - width)
+         {
+            this.warp(FlxG.width - width,y);
+         }
+         if(x >= FlxG.width)
+         {
+            this.warp(0,y);
+         }
+         if(y <= 0 - height)
+         {
+            this.warp(x,FlxG.height - height);
+         }
+         if(y >= FlxG.height)
+         {
+            this.warp(x,0);
+         }
+      }
+      protected function warp(param1:int, param2:int) : void
+      {
+         x = param1;
+         y = param2;
+         FlxG.play(Content.WarpEdgeSound,0.8);
+         this._warps.add(new Warp(x - 20,y - 20,_level));
+      }
+      protected function handleInput() : void
+      {
+      }
+      protected function updateGraphics() : void
+      {
+         if(dead)
+         {
+            play(DIEING_ANIMATION);
+            return;
+         }
+         if(velocity.x == 0)
+         {
+            play(STANDING_ANIMATION);
+         }
+         else
+         {
+            play(WALKING_ANIMATION);
+            if(onFloor && !this._stepSound.playing)
+            {
+               this._stepSound = FlxG.play(Content.StepSound,0.5);
+            }
+         }
+         if(velocity.y < 0)
+         {
+            play(JUMPING_ANIMATION);
+         }
+         else if(velocity.y > 0)
+         {
+            play(FALLING_ANIMATION);
+         }
+      }
+      override public function kill() : void
+      {
+         dead = true;
+         solid = false;
+         acceleration.x = 0;
+         acceleration.y = 0;
+         velocity.x = 0;
+         velocity.y = -100;
+         FlxG.play(Content.DieSound);
+      }
+      override public function reset(param1:Number, param2:Number) : void
+      {
+         super.reset(param1,param2);
+         this._warps.destroy();
+      }
+      override public function destroy() : void
+      {
+         super.destroy();
+         this._warps.destroy();
+         this._warps.exists = false;
+      }
+   }
+}

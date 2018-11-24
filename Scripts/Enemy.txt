@@ -1,0 +1,83 @@
+package dee.moly.warp.game.actors
+{
+   import content.Content;
+   import dee.moly.warp.game.scenery.Tilemap;
+   import dee.moly.warp.game.states.LevelState;
+   import dee.moly.warp.game.tasks.TasksTracker;
+   import org.flixel.FlxG;
+   import org.flixel.FlxU;
+   public class Enemy extends Actor
+   {
+      public function Enemy(param1:int, param2:int, param3:LevelState)
+      {
+         super(param1,param2,param3);
+         acceleration.x = RUN_SPEED * 8;
+         maxVelocity.x = 120;
+         facing = RIGHT;
+      }
+      override protected function handleInput() : void
+      {
+         super.handleInput();
+         if(dead)
+         {
+            return;
+         }
+         if(facing == RIGHT && this.isCollidable(x / 16 + 1,y / 16))
+         {
+            facing = LEFT;
+            acceleration.x = -acceleration.x;
+         }
+         if(facing == LEFT && this.isCollidable((x + width) / 16 - 1,y / 16))
+         {
+            facing = RIGHT;
+            acceleration.x = -acceleration.x;
+         }
+      }
+      protected function isCollidable(param1:int, param2:int) : Boolean
+      {
+         if(param1 >= _level.tilemap.widthInTiles || param1 < 0)
+         {
+            return false;
+         }
+         var _loc3_:int = 0;
+         while(_loc3_ < FlxU.ceil(height / Tilemap.TILE_HEIGHT))
+         {
+            if(param2 + _loc3_ >= _level.tilemap.heightInTiles || param2 < 0)
+            {
+               return false;
+            }
+            if(_level.getTile(param1,param2 + _loc3_) >= Tilemap.ENEMY_BLOCK)
+            {
+               return true;
+            }
+            _loc3_++;
+         }
+         return false;
+      }
+      override protected function updateCollisions() : void
+      {
+         if(y <= 0 - height && dead)
+         {
+            exists = false;
+         }
+         super.updateCollisions();
+         if(overlaps(_level.player) && !dead && !_level.player.dead)
+         {
+            if(_level.player.invincible)
+            {
+               this.kill();
+               FlxG.play(Content.ShieldSound);
+            }
+            else
+            {
+               _level.player.kill();
+            }
+         }
+      }
+      override public function kill() : void
+      {
+         super.kill();
+         TasksTracker.enemiesKilled++;
+      }
+   }
+}

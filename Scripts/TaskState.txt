@@ -1,0 +1,139 @@
+package dee.moly.warp.game.tasks
+{
+   import content.Content;
+   import dee.moly.warp.game.states.ExitableState;
+   import dee.moly.warp.utils.LevelLoader;
+   import org.flixel.FlxG;
+   import org.flixel.FlxGroup;
+   import org.flixel.FlxSprite;
+   public class TasksState extends ExitableState
+   {
+      private static const SCROLL_SPEED:int = 80;
+      private var _tasks:FlxGroup;
+      private var _leftArrow:FlxSprite;
+      private var _rightArrow:FlxSprite;
+      public function TasksState()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         FlxG.mouse.show();
+         this.createTasksGroup();
+         this.createButtons();
+         loadLevel(LevelLoader.load(new Content.Menu2JSON()));
+         _scenery.visible = false;
+      }
+      private function createTasksGroup() : void
+      {
+         this._tasks = new FlxGroup();
+         defaultGroup.members.splice(1,0,this._tasks);
+         var _loc1_:FlxSprite = new FlxSprite(32,48);
+         _loc1_.loadGraphic(Content.FighterStrip,true,false,256,48);
+         _loc1_.frame = TasksTracker.enemiesKilled >= 5?uint(1):uint(0);
+         this._tasks.add(_loc1_);
+         var _loc2_:FlxSprite = new FlxSprite(32,116);
+         _loc2_.loadGraphic(Content.WarriorStrip,true,false,256,48);
+         _loc2_.frame = TasksTracker.enemiesKilled >= 10?uint(1):uint(0);
+         this._tasks.add(_loc2_);
+         var _loc3_:FlxSprite = new FlxSprite(32,184);
+         _loc3_.loadGraphic(Content.WarlordStrip,true,false,256,48);
+         _loc3_.frame = TasksTracker.enemiesKilled >= 20?uint(1):uint(0);
+         this._tasks.add(_loc3_);
+         var _loc4_:FlxSprite = new FlxSprite(288,48);
+         _loc4_.loadGraphic(Content.TooBadStrip,true,false,256,48);
+         _loc4_.frame = TasksTracker.timesDied >= 5?uint(1):uint(0);
+         this._tasks.add(_loc4_);
+         var _loc5_:FlxSprite = new FlxSprite(288,116);
+         _loc5_.loadGraphic(Content.WeakStrip,true,false,256,48);
+         _loc5_.frame = TasksTracker.timesDied >= 10?uint(1):uint(0);
+         this._tasks.add(_loc5_);
+         var _loc6_:FlxSprite = new FlxSprite(288,184);
+         _loc6_.loadGraphic(Content.PunchStrip,true,false,256,48);
+         _loc6_.frame = TasksTracker.timesDied >= 20?uint(1):uint(0);
+         this._tasks.add(_loc6_);
+         var _loc7_:FlxSprite = new FlxSprite(544,48);
+         _loc7_.loadGraphic(Content.WarperStrip,true,false,256,48);
+         _loc7_.frame = TasksTracker.timesWarped >= 30?uint(1):uint(0);
+         this._tasks.add(_loc7_);
+         var _loc8_:FlxSprite = new FlxSprite(544,116);
+         _loc8_.loadGraphic(Content.WarpalotStrip,true,false,256,48);
+         _loc8_.frame = TasksTracker.timesWarped >= 60?uint(1):uint(0);
+         this._tasks.add(_loc8_);
+         var _loc9_:FlxSprite = new FlxSprite(544,184);
+         _loc9_.loadGraphic(Content.NatorStrip,true,false,256,48);
+         _loc9_.frame = TasksTracker.timesWarped >= 120?uint(1):uint(0);
+         this._tasks.add(_loc9_);
+         var _loc10_:FlxSprite = new FlxSprite(800,48);
+         _loc10_.loadGraphic(Content.NotBadStrip,true,false,272,48);
+         _loc10_.frame = TasksTracker.levelsCompleted >= 10?uint(1):uint(0);
+         this._tasks.add(_loc10_);
+         var _loc11_:FlxSprite = new FlxSprite(800,116);
+         _loc11_.loadGraphic(Content.GreatStrip,true,false,272,48);
+         _loc11_.frame = TasksTracker.levelsCompleted >= 20?uint(1):uint(0);
+         this._tasks.add(_loc11_);
+         var _loc12_:FlxSprite = new FlxSprite(800,184);
+         _loc12_.loadGraphic(Content.AwesomeStrip,true,false,272,48);
+         _loc12_.frame = TasksTracker.levelsCompleted >= 30?uint(1):uint(0);
+         this._tasks.add(_loc12_);
+      }
+      private function createButtons() : void
+      {
+         this._leftArrow = new FlxSprite(0,0,Content.ArrowLeft);
+         this._leftArrow.x = 5;
+         this._leftArrow.y = (FlxG.height - this._leftArrow.height) / 2;
+         add(this._leftArrow);
+         this._rightArrow = new FlxSprite(FlxG.width - this._leftArrow.width - this._leftArrow.x,this._leftArrow.y,Content.ArrowRight);
+         add(this._rightArrow);
+      }
+      private function scrollRight() : void
+      {
+         if(this._tasks.x < 0)
+         {
+            this._tasks.velocity.x = SCROLL_SPEED;
+         }
+         else
+         {
+            this._tasks.velocity.x = 0;
+         }
+      }
+      private function scrollLeft() : void
+      {
+         if(this._tasks.x > -632)
+         {
+            this._tasks.velocity.x = -SCROLL_SPEED;
+         }
+         else
+         {
+            this._tasks.velocity.x = 0;
+         }
+      }
+      override public function update() : void
+      {
+         super.update();
+         if(FlxG.keys.RIGHT)
+         {
+            this.scrollLeft();
+         }
+         else if(FlxG.keys.LEFT)
+         {
+            this.scrollRight();
+         }
+         else
+         {
+            this._tasks.velocity.x = 0;
+         }
+         this._leftArrow.visible = true;
+         this._rightArrow.visible = true;
+         if(this._tasks.x >= 0)
+         {
+            this._leftArrow.visible = false;
+         }
+         else if(this._tasks.x <= -632)
+         {
+            this._rightArrow.visible = false;
+         }
+      }
+   }
+}

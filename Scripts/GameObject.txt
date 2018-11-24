@@ -1,0 +1,14 @@
+package dee.moly.warp.game
+{
+   import dee.moly.warp.game.states.LevelState;
+   import org.flixel.FlxSprite;
+   public class GameObject extends FlxSprite
+   {
+      protected var _level:LevelState;
+      public function GameObject(param1:int, param2:int, param3:LevelState)
+      {
+         super(param1,param2);
+         this._level = param3;
+      }
+   }
+}

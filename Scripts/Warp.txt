@@ -1,0 +1,24 @@
+package dee.moly.warp.game.scenery
+{
+   import dee.moly.warp.animations.Animation;
+   import dee.moly.warp.animations.WarpAnimation;
+   import dee.moly.warp.game.GameObject;
+   import dee.moly.warp.game.states.LevelState;
+   public class Warp extends GameObject
+   {
+      public function Warp(param1:int, param2:int, param3:LevelState)
+      {
+         super(param1,param2,param3);
+         var _loc4_:Animation = new WarpAnimation();
+         _loc4_.init(this);
+      }
+      override public function update() : void
+      {
+         super.update();
+         if(finished)
+         {
+            exists = false;
+         }
+      }
+   }
+}

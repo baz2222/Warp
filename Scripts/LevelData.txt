@@ -1,0 +1,72 @@
+package dee.moly.warp.game
+{
+   import org.flixel.FlxPoint;
+   public class LevelData
+   {
+      public var world:int = 0;
+      public var name:String = "";
+      public var tilemap:Array;
+      public var start:FlxPoint;
+      public var exit:FlxPoint;
+      public var plant1s:Array;
+      public var plant2s:Array;
+      public var switches:Array;
+      public var enemies:Array;
+      public var spikeEnemies:Array;
+      public var bumps:Array;
+      public var buffBombs:Array;
+      public var buffJumps:Array;
+      public var buffShields:Array;
+      public var tutorialImage:String = "";
+      public var tutorialPos:FlxPoint;
+      public function LevelData(param1:Object = null)
+      {
+         var object:Object = param1;
+         this.tilemap = [];
+         this.start = new FlxPoint();
+         this.exit = new FlxPoint();
+         this.plant1s = [];
+         this.plant2s = [];
+         this.switches = [];
+         this.enemies = [];
+         this.spikeEnemies = [];
+         this.bumps = [];
+         this.buffBombs = [];
+         this.buffJumps = [];
+         this.buffShields = [];
+         this.tutorialPos = new FlxPoint();
+         super();
+         if(!object)
+         {
+            return;
+         }
+         try
+         {
+            this.world = object.world;
+            this.tilemap = object.tilemap;
+            this.start = new FlxPoint(object.start.x,object.start.y);
+            this.exit = new FlxPoint(object.exit.x,object.exit.y);
+            this.plant1s = object.plant1s;
+            this.plant2s = object.plant2s;
+            this.switches = object.switches;
+            this.enemies = object.enemies;
+            this.spikeEnemies = object.spikeEnemies;
+            this.bumps = object.bumps;
+            this.buffBombs = object.buffBombs;
+            this.buffJumps = object.buffJumps;
+            this.buffShields = object.buffShields;
+            this.tutorialImage = object.tutorialImage;
+            this.tutorialPos = new FlxPoint(object.tutorialPos.x,object.tutorialPos.y);
+            if(object.name != null)
+            {
+               this.name = String(object.name).substring(0,16);
+            }
+            return;
+         }
+         catch(e:Error)
+         {
+            throw new Error("Invalid Level Object");
+         }
+      }
+   }
+}

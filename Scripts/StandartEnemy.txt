@@ -1,0 +1,52 @@
+package dee.moly.warp.game.actors
+{
+   import content.Content;
+   import dee.moly.warp.animations.Animation;
+   import dee.moly.warp.animations.EnemyAnimation;
+   import dee.moly.warp.game.scenery.Tilemap;
+   import dee.moly.warp.game.states.LevelState;
+   import org.flixel.FlxG;
+   public class StandardEnemy extends Enemy
+   {
+      public function StandardEnemy(param1:int, param2:int, param3:LevelState)
+      {
+         super(param1,param2,param3);
+         var _loc4_:Animation = new EnemyAnimation();
+         _loc4_.init(this);
+      }
+      override protected function updateCollisions() : void
+      {
+         var _loc1_:int = 0;
+         var _loc2_:int = 0;
+         if(dead)
+         {
+            return;
+         }
+         if(_level.player.dead == false && overlaps(_level.player) && _level.player.velocity.y > 0)
+         {
+            if(_level.player.explosive)
+            {
+               FlxG.quake.start(0.03,1);
+               FlxG.play(Content.BombSound);
+               _loc1_ = x / 16 - 2;
+               while(_loc1_ < int((x + width) / 16) + 2)
+               {
+                  _loc2_ = y / 16 - 2;
+                  while(_loc2_ < int((y + height) / 16) + 2)
+                  {
+                     if(_level.tilemap.getTile(_loc1_,_loc2_) > Tilemap.PLATFORM_TILE)
+                     {
+                        _level.tilemap.setTile(_loc1_,_loc2_,Tilemap.EMPTY_TILE);
+                        FlxG.play(Content.BreakSound);
+                     }
+                     _loc2_++;
+                  }
+                  _loc1_++;
+               }
+            }
+            kill();
+         }
+         super.updateCollisions();
+      }
+   }
+}

@@ -1,0 +1,45 @@
+package dee.moly.warp.game.states
+{
+   import content.Content;
+   import flash.display.MovieClip;
+   import org.flixel.FlxG;
+   import org.flixel.FlxState;
+   import org.flixel.FlxU;
+   public class SponsorSplashState extends State
+   {
+      private var _sponsorIntro:MovieClip;
+      public function SponsorSplashState()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         FlxState.bgColor = 4294967295;
+         this._sponsorIntro = new Content.SponsorScreen();
+         addChild(this._sponsorIntro);
+         this._sponsorIntro.x = 275;
+         this._sponsorIntro.y = 200;
+      }
+      override public function update() : void
+      {
+         super.update();
+         if(FlxG.mouse.justPressed())
+         {
+            FlxU.openURL("http://subwaypunk.com");
+         }
+         if(this._sponsorIntro.currentFrame >= this._sponsorIntro.totalFrames)
+         {
+            FlxG.state = new SplashState();
+         }
+      }
+      override public function destroy() : void
+      {
+         super.destroy();
+         removeChild(this._sponsorIntro);
+         this._sponsorIntro.stop();
+         this._sponsorIntro = null;
+         FlxState.bgColor = 4278190080;
+      }
+   }
+}

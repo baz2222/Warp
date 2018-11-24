@@ -1,0 +1,44 @@
+package dee.moly.warp.game.props
+{
+   import content.Content;
+   import dee.moly.warp.animations.Animation;
+   import dee.moly.warp.animations.SwitchAnimation;
+   import dee.moly.warp.game.GameObject;
+   import dee.moly.warp.game.states.LevelState;
+   import org.flixel.FlxG;
+   public class Switch extends GameObject
+   {
+      private static var activeSwitches:int = 0;
+      private var _on:Boolean;
+      public function Switch(param1:int, param2:int, param3:LevelState)
+      {
+         super(param1,param2,param3);
+         var _loc4_:Animation = new SwitchAnimation();
+         _loc4_.init(this);
+         this._on = true;
+         activeSwitches++;
+         param3.door.exists = false;
+      }
+      override public function update() : void
+      {
+         super.update();
+         if(this._on && (FlxG.keys.justPressed("Z") || FlxG.keys.justPressed("DOWN")) && overlaps(_level.player) && !_level.player.dead)
+         {
+            activeSwitches--;
+            if(activeSwitches <= 0)
+            {
+               _level.door.exists = true;
+               _level.door.alpha = 0;
+            }
+            this._on = false;
+            play(SwitchAnimation.OFF_ANIMATION);
+            FlxG.play(Content.SwitchSound,0.7);
+         }
+      }
+      override public function destroy() : void
+      {
+         super.destroy();
+         activeSwitches = 0;
+      }
+   }
+}

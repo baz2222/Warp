@@ -1,0 +1,20 @@
+package dee.moly.warp.game.props
+{
+   import content.Content;
+   import dee.moly.warp.game.states.LevelState;
+   public class BuffJump extends Buff
+   {
+      public function BuffJump(param1:int, param2:int, param3:LevelState)
+      {
+         super(param1,param2,param3,Content.BuffJumpSheet);
+      }
+      override protected function onPlayerCollide() : void
+      {
+         super.onPlayerCollide();
+         _level.player.color = 9562730;
+         _level.player.jumpMultiplier = true;
+         _level.player.invincible = false;
+         _level.player.explosive = false;
+      }
+   }
+}

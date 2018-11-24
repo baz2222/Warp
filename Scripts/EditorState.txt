@@ -1,0 +1,531 @@
+package dee.moly.warp.editor
+{
+   import content.Content;
+   import dee.moly.warp.animations.Animation;
+   import dee.moly.warp.animations.BombAnimation;
+   import dee.moly.warp.animations.BumpAnimation;
+   import dee.moly.warp.animations.DoorAnimation;
+   import dee.moly.warp.animations.EnemyAnimation;
+   import dee.moly.warp.animations.JumpAnimation;
+   import dee.moly.warp.animations.PlayerAnimation;
+   import dee.moly.warp.animations.ShieldAnimation;
+   import dee.moly.warp.animations.SpikeEnemyAnimation;
+   import dee.moly.warp.animations.SwitchAnimation;
+   import dee.moly.warp.game.LevelData;
+   import dee.moly.warp.game.scenery.Tilemap;
+   import dee.moly.warp.game.states.State;
+   import dee.moly.warp.game.states.menus.MainMenuState;
+   import flash.display.Bitmap;
+   import flash.utils.ByteArray;
+   import org.flixel.FlxG;
+   import org.flixel.FlxGroup;
+   import org.flixel.FlxPoint;
+   import org.flixel.FlxSprite;
+   public class EditorState extends State
+   {
+      public var deleteMode:Boolean;
+      public var mouseEventHandled:Boolean;
+      private var _start:EditorObject;
+      private var _exit:EditorObject;
+      private var _tileType:int;
+      private var _inventory:Inventory;
+      private var _tiling:Boolean;
+      private var _plant1s:FlxGroup;
+      private var _plant2s:FlxGroup;
+      private var _enemies:FlxGroup;
+      private var _spikeEnemies:FlxGroup;
+      private var _switches:FlxGroup;
+      private var _bumps:FlxGroup;
+      private var _buffBombs:FlxGroup;
+      private var _buffJumps:FlxGroup;
+      private var _buffShields:FlxGroup;
+      private var _tutorialImage:String;
+      private var _tutorialPos:FlxPoint;
+      private var _tileIcon:FlxSprite;
+      private var _plant1Icon:FlxSprite;
+      private var _plant2Icon:FlxSprite;
+      public function EditorState()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         FlxG.mouse.show();
+         this._tileType = 3;
+         this.createEditorObjects();
+         this.createInventory();
+         this.loadLevel(FlxG.levels[0]);
+         FlxG.playMusic(Content.MenuTheme,0.7);
+      }
+      private function createEditorObjects() : void
+      {
+         this._plant1s = new FlxGroup();
+         _scenery.add(this._plant1s);
+         this._plant2s = new FlxGroup();
+         _scenery.add(this._plant2s);
+         this._exit = new EditorObject(new DoorAnimation(),this);
+         this._exit.deleteable = false;
+         add(this._exit);
+         this._switches = new FlxGroup();
+         add(this._switches);
+         this._bumps = new FlxGroup();
+         add(this._bumps);
+         this._buffBombs = new FlxGroup();
+         add(this._buffBombs);
+         this._buffJumps = new FlxGroup();
+         add(this._buffJumps);
+         this._buffShields = new FlxGroup();
+         add(this._buffShields);
+         this._enemies = new FlxGroup();
+         add(this._enemies);
+         this._spikeEnemies = new FlxGroup();
+         add(this._spikeEnemies);
+         this._start = new EditorObject(new PlayerAnimation(),this);
+         this._start.deleteable = false;
+         add(this._start);
+      }
+      private function createInventory() : void
+      {
+         this._tileIcon = new FlxSprite();
+         this._tileIcon.loadGraphic(Content.TileIcon,true,false,32,32);
+         this._tileIcon.frame = this._tileType;
+         this._plant1Icon = new FlxSprite();
+         this._plant1Icon.loadGraphic(Content.Plant1Icon,true,false,32,32);
+         this._plant1Icon.frame = _world;
+         this._plant2Icon = new FlxSprite();
+         this._plant2Icon.loadGraphic(Content.Plant2Icon,true,false,32,32);
+         this._plant2Icon.frame = _world;
+         this._inventory = new Inventory(0,FlxG.height - 32);
+         this._inventory.addButton(new FlxSprite(0,0,Content.WorldIcon),this.onWorldSelect);
+         this._inventory.addButton(this._tileIcon,this.onTileSelect);
+         this._inventory.addButton(this._plant1Icon,this.onPlant1Select);
+         this._inventory.addButton(this._plant2Icon,this.onPlant2Select);
+         this._inventory.addButton(new FlxSprite(0,0,Content.SwitchIcon),this.onSwitchSelect);
+         this._inventory.addButton(new FlxSprite(0,0,Content.BumpIcon),this.onBumpSelect);
+         this._inventory.addButton(new FlxSprite(0,0,Content.BombIcon),this.onBombSelect);
+         this._inventory.addButton(new FlxSprite(0,0,Content.JumpIcon),this.onJumpSelect);
+         this._inventory.addButton(new FlxSprite(0,0,Content.ShieldIcon),this.onShieldSelect);
+         this._inventory.addButton(new FlxSprite(0,0,Content.EnemyIcon),this.onEnemySelect);
+         this._inventory.addButton(new FlxSprite(0,0,Content.SpikeEnemyIcon),this.onSpikeEnemySelect);
+         this._inventory.addButton(new FlxSprite(0,0,Content.TrashIcon),this.onTrashSelect);
+         this._inventory.addButton(new FlxSprite(0,0,Content.PreviewIcon),this.onPreviewSelect);
+         this._inventory.addButton(new FlxSprite(0,0,Content.SaveIcon),this.onSaveSelect);
+         this._inventory.addButton(new FlxSprite(0,0,Content.ExitIcon),this.onExitSelect);
+         add(this._inventory);
+      }
+      override protected function loadLevel(param1:LevelData) : void
+      {
+         super.loadLevel(param1);
+         this._start.reset(param1.start.x,param1.start.y);
+         this._exit.reset(param1.exit.x,param1.exit.y);
+         this.loadProps(param1);
+         this._tutorialImage = param1.tutorialImage || "";
+         this._tutorialPos = param1.tutorialPos || new FlxPoint();
+         this.setWorld(_world);
+      }
+      override protected function loadTilemap(param1:LevelData) : void
+      {
+         super.loadTilemap(param1);
+         _tilemap.loadMap(param1.tilemap,Content.EditorTiles,FlxG.width / Tilemap.TILE_WIDTH);
+      }
+      override protected function loadScenery(param1:LevelData) : void
+      {
+         var _loc2_:Object = null;
+         var _loc3_:EditorObject = null;
+         this._plant1s.destroy();
+         for each(_loc2_ in param1.plant1s)
+         {
+            _loc3_ = new EditorObject(new Animation(),this,_loc2_.x,_loc2_.y);
+            _loc3_.loadGraphic(_plant1Graphics[_world]);
+            this._plant1s.add(_loc3_);
+         }
+         this._plant2s.destroy();
+         for each(_loc2_ in param1.plant2s)
+         {
+            _loc3_ = new EditorObject(new Animation(),this,_loc2_.x,_loc2_.y);
+            _loc3_.loadGraphic(_plant2Graphics[_world]);
+            this._plant2s.add(_loc3_);
+         }
+      }
+      private function loadProps(param1:LevelData) : void
+      {
+         var _loc2_:Object = null;
+         this._switches.destroy();
+         for each(_loc2_ in param1.switches)
+         {
+            this._switches.add(new EditorObject(new SwitchAnimation(),this,_loc2_.x,_loc2_.y));
+         }
+         this._enemies.destroy();
+         for each(_loc2_ in param1.enemies)
+         {
+            this._enemies.add(new EditorObject(new EnemyAnimation(),this,_loc2_.x,_loc2_.y));
+         }
+         this._spikeEnemies.destroy();
+         for each(_loc2_ in param1.spikeEnemies)
+         {
+            this._spikeEnemies.add(new EditorObject(new SpikeEnemyAnimation(),this,_loc2_.x,_loc2_.y));
+         }
+         this._bumps.destroy();
+         for each(_loc2_ in param1.bumps)
+         {
+            this._bumps.add(new EditorObject(new BumpAnimation(),this,_loc2_.x,_loc2_.y));
+         }
+         this._buffBombs.destroy();
+         for each(_loc2_ in param1.buffBombs)
+         {
+            this._buffBombs.add(new EditorObject(new BombAnimation(),this,_loc2_.x,_loc2_.y));
+         }
+         this._buffJumps.destroy();
+         for each(_loc2_ in param1.buffJumps)
+         {
+            this._buffJumps.add(new EditorObject(new JumpAnimation(),this,_loc2_.x,_loc2_.y));
+         }
+         this._buffShields.destroy();
+         for each(_loc2_ in param1.buffShields)
+         {
+            this._buffShields.add(new EditorObject(new ShieldAnimation(),this,_loc2_.x,_loc2_.y));
+         }
+      }
+      private function onTileSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         this._tileType++;
+         if(this._tileType > 4)
+         {
+            this._tileType = 0;
+         }
+         this._tileIcon.frame = this._tileType;
+      }
+      private function onPlant1Select() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         var _loc1_:EditorObject = new EditorObject(new Animation(),this,-80,-32);
+         _loc1_.loadGraphic(_plant1Graphics[_world]);
+         _loc1_.dragging = true;
+         this._plant1s.add(_loc1_);
+      }
+      private function onPlant2Select() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         var _loc1_:EditorObject = new EditorObject(new Animation(),this,-80,-32);
+         _loc1_.loadGraphic(_plant2Graphics[_world]);
+         _loc1_.dragging = true;
+         this._plant2s.add(_loc1_);
+      }
+      private function onSwitchSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         var _loc1_:EditorObject = new EditorObject(new SwitchAnimation(),this,-80,-32);
+         _loc1_.dragging = true;
+         this._switches.add(_loc1_);
+      }
+      private function onBumpSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         var _loc1_:EditorObject = new EditorObject(new BumpAnimation(),this,-80,-32);
+         _loc1_.dragging = true;
+         this._bumps.add(_loc1_);
+      }
+      private function onBombSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         var _loc1_:EditorObject = new EditorObject(new BombAnimation(),this,-80,-32);
+         _loc1_.dragging = true;
+         this._buffBombs.add(_loc1_);
+      }
+      private function onJumpSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         var _loc1_:EditorObject = new EditorObject(new JumpAnimation(),this,-80,-32);
+         _loc1_.dragging = true;
+         this._buffJumps.add(_loc1_);
+      }
+      private function onShieldSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         var _loc1_:EditorObject = new EditorObject(new ShieldAnimation(),this,-80,-32);
+         _loc1_.dragging = true;
+         this._buffShields.add(_loc1_);
+      }
+      private function onEnemySelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         var _loc1_:EditorObject = new EditorObject(new EnemyAnimation(),this,-80,-32);
+         _loc1_.dragging = true;
+         this._enemies.add(_loc1_);
+      }
+      private function onSpikeEnemySelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         var _loc1_:EditorObject = new EditorObject(new SpikeEnemyAnimation(),this,-80,-32);
+         _loc1_.dragging = true;
+         this._spikeEnemies.add(_loc1_);
+      }
+      private function onWorldSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         _world++;
+         if(_world >= _backgrounds.length)
+         {
+            _world = 0;
+         }
+         this.setWorld(_world);
+      }
+      private function onTrashSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         FlxG.mouse.load(Content.TrashCursor);
+         this.deleteMode = true;
+      }
+      private function onSaveSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         var levelData:LevelData = this.createLevelData();
+         var byteArr:ByteArray = new ByteArray();
+         byteArr.writeUTFBytes(com.adobe.serialization.json.JSON.encode(levelData));
+         byteArr.position = 0;
+         byteArr.compress();
+         try
+         {
+            FlxG.portalAPI.submitSharedContent("Level",Base64.encode(byteArr),function onSaved(param1:Object):void
+            {
+            },new Bitmap(FlxG.buffer));
+            return;
+         }
+         catch(e:Error)
+         {
+            return;
+         }
+      }
+      private function onPreviewSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         FlxG.level = 0;
+         FlxG.levels[0] = this.createLevelData();
+         FlxG.state = new PreviewState();
+      }
+      private function onExitSelect() : void
+      {
+         if(!this._inventory.visible)
+         {
+            return;
+         }
+         FlxG.state = new MainMenuState();
+      }
+      private function createLevelData() : LevelData
+      {
+         var _loc3_:EditorObject = null;
+         this._plant1s.members = this._plant1s.members.filter(this.filterFunction);
+         this._plant2s.members = this._plant2s.members.filter(this.filterFunction);
+         this._switches.members = this._switches.members.filter(this.filterFunction);
+         this._enemies.members = this._enemies.members.filter(this.filterFunction);
+         this._spikeEnemies.members = this._spikeEnemies.members.filter(this.filterFunction);
+         this._bumps.members = this._bumps.members.filter(this.filterFunction);
+         this._buffJumps.members = this._buffJumps.members.filter(this.filterFunction);
+         this._buffShields.members = this._buffShields.members.filter(this.filterFunction);
+         this._buffBombs.members = this._buffBombs.members.filter(this.filterFunction);
+         var _loc1_:LevelData = new LevelData();
+         _loc1_.world = _world;
+         _loc1_.tilemap = new Array();
+         var _loc2_:int = 0;
+         while(_loc2_ < _tilemap.totalTiles)
+         {
+            _loc1_.tilemap.push(_tilemap.getTileByIndex(_loc2_));
+            _loc2_++;
+         }
+         _loc1_.start = new FlxPoint(this._start.x,this._start.y);
+         _loc1_.exit = new FlxPoint(this._exit.x,this._exit.y);
+         for each(_loc3_ in this._plant1s.members)
+         {
+            _loc1_.plant1s.push({
+               "x":_loc3_.x,
+               "y":_loc3_.y
+            });
+         }
+         for each(_loc3_ in this._plant2s.members)
+         {
+            _loc1_.plant2s.push({
+               "x":_loc3_.x,
+               "y":_loc3_.y
+            });
+         }
+         for each(_loc3_ in this._switches.members)
+         {
+            _loc1_.switches.push({
+               "x":_loc3_.x,
+               "y":_loc3_.y
+            });
+         }
+         for each(_loc3_ in this._enemies.members)
+         {
+            _loc1_.enemies.push({
+               "x":_loc3_.x,
+               "y":_loc3_.y
+            });
+         }
+         for each(_loc3_ in this._spikeEnemies.members)
+         {
+            _loc1_.spikeEnemies.push({
+               "x":_loc3_.x,
+               "y":_loc3_.y
+            });
+         }
+         for each(_loc3_ in this._bumps.members)
+         {
+            _loc1_.bumps.push({
+               "x":_loc3_.x,
+               "y":_loc3_.y
+            });
+         }
+         for each(_loc3_ in this._buffJumps.members)
+         {
+            _loc1_.buffJumps.push({
+               "x":_loc3_.x,
+               "y":_loc3_.y
+            });
+         }
+         for each(_loc3_ in this._buffShields.members)
+         {
+            _loc1_.buffShields.push({
+               "x":_loc3_.x,
+               "y":_loc3_.y
+            });
+         }
+         for each(_loc3_ in this._buffBombs.members)
+         {
+            _loc1_.buffBombs.push({
+               "x":_loc3_.x,
+               "y":_loc3_.y
+            });
+         }
+         _loc1_.tutorialPos = this._tutorialPos;
+         _loc1_.tutorialImage = this._tutorialImage;
+         return _loc1_;
+      }
+      private function setWorld(param1:int) : void
+      {
+         var _loc2_:EditorObject = null;
+         if(param1 >= _backgrounds.length)
+         {
+            return;
+         }
+         _world = param1;
+         _background.loadGraphic(_backgrounds[param1]);
+         for each(_loc2_ in this._plant1s.members)
+         {
+            _loc2_.loadGraphic(_plant1Graphics[_world]);
+         }
+         for each(_loc2_ in this._plant2s.members)
+         {
+            _loc2_.loadGraphic(_plant2Graphics[_world]);
+         }
+         _tilemap.setGrassGraphic(_grass[param1]);
+         _tilemap.setLumpsGraphic(_lumps[param1]);
+         this._plant1Icon.frame = param1;
+         this._plant2Icon.frame = param1;
+      }
+      override public function update() : void
+      {
+         var _loc1_:int = 0;
+         var _loc2_:int = 0;
+         var _loc3_:int = 0;
+         this.mouseEventHandled = false;
+         FlxG.mouse.show();
+         if(FlxG.mouse.justPressed())
+         {
+            if(this._inventory.visible && this._inventory.overlapsPoint(FlxG.mouse.x,FlxG.mouse.y))
+            {
+               this.mouseEventHandled = true;
+            }
+            else
+            {
+               this._tiling = true;
+            }
+         }
+         super.update();
+         if(FlxG.keys.justPressed("SPACE"))
+         {
+            this._inventory.visible = !this._inventory.visible;
+         }
+         if(FlxG.mouse.justReleased() || this.mouseEventHandled)
+         {
+            this._tiling = false;
+         }
+         if(this._tiling)
+         {
+            _loc1_ = FlxG.mouse.x / Tilemap.TILE_WIDTH;
+            _loc2_ = FlxG.mouse.y / Tilemap.TILE_HEIGHT;
+            _loc3_ = _tilemap.getTile(_loc1_,_loc2_);
+            _tilemap.setTile(_loc1_,_loc2_,this._tileType);
+            if(this._tileType == Tilemap.CRUMBLE_TILE || this._tileType == Tilemap.PLATFORM_TILE || this._tileType == Tilemap.EMPTY_TILE)
+            {
+               if(_loc1_ == 0)
+               {
+                  _tilemap.setTile(_tilemap.widthInTiles - 1,_loc2_,this._tileType);
+               }
+               else if(_loc1_ == _tilemap.widthInTiles - 1)
+               {
+                  _tilemap.setTile(0,_loc2_,this._tileType);
+               }
+               if(_loc2_ == 0)
+               {
+                  _tilemap.setTile(_loc1_,_tilemap.heightInTiles - 1,this._tileType);
+               }
+               else if(_loc2_ == _tilemap.heightInTiles - 1)
+               {
+                  _tilemap.setTile(_loc1_,0,this._tileType);
+               }
+            }
+            FlxG.mouse.unload();
+            this.deleteMode = false;
+         }
+      }
+      private function filterFunction(param1:*, param2:int, param3:Array) : Boolean
+      {
+         return param1.exists;
+      }
+   }
+}

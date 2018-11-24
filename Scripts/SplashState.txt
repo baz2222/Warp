@@ -1,0 +1,89 @@
+package dee.moly.warp.game.states
+{
+   import content.Content;
+   import dee.moly.warp.game.LevelData;
+   import dee.moly.warp.game.states.menus.MainMenuState;
+   import dee.moly.warp.game.tasks.TasksTracker;
+   import dee.moly.warp.utils.FlashPortal;
+   import dee.moly.warp.utils.LevelLoader;
+   import dee.moly.warp.utils.SaveFile;
+   import dee.moly.warp.utils.Timer;
+   import dee.moly.warp.utils.UnknownPortalWarpAPI;
+   import org.flixel.FlxButton;
+   import org.flixel.FlxG;
+   import org.flixel.FlxSprite;
+   import org.flixel.FlxU;
+   public class SplashState extends State
+   {
+      private static const DISPLAY_TIME:int = 0;
+      private static const DEVELOPER_SITE:String = "http://www.yoyogames.com/users/GraniteGear";
+      private var _timer:Timer;
+      public function SplashState()
+      {
+         super();
+      }
+      override public function create() : void
+      {
+         super.create();
+         FlxG.mouse.show();
+         this.createTimer();
+         if(FlxG.portalAPI == null)
+         {
+            FlashPortal.setUnknownAPI(UnknownPortalWarpAPI);
+            FlxG.portalAPI = FlashPortal.getAPI(root.loaderInfo.url);
+         }
+         this.loadSaveFile();
+         loadLevel(LevelLoader.load(new Content.SplashJSON()));
+      }
+      override protected function loadOverlay(param1:LevelData) : void
+      {
+         var button:FlxButton = null;
+         var levelData:LevelData = param1;
+         try
+         {
+            button = new FlxButton(levelData.tutorialPos.x,levelData.tutorialPos.y,this.onButtonPressed);
+            button.loadGraphic(new FlxSprite(0,0,Content[levelData.tutorialImage]));
+         }
+         catch(e:Error)
+         {
+            _overlay.exists = false;
+         }
+         defaultGroup.replace(_overlay,button);
+      }
+      private function onButtonPressed() : void
+      {
+         FlxU.openURL(DEVELOPER_SITE);
+      }
+      private function createTimer() : void
+      {
+         this._timer = new Timer(DISPLAY_TIME,this.onTimerComplete);
+         add(this._timer);
+      }
+      private function onTimerComplete() : void
+      {
+         FlxG.state = new MainMenuState();
+      }
+      private function loadSaveFile() : void
+      {
+         SaveFile.load();
+         TasksTracker.visible = false;
+         if(SaveFile.enemiesKilled > TasksTracker.enemiesKilled)
+         {
+            TasksTracker.enemiesKilled = SaveFile.enemiesKilled;
+         }
+         if(SaveFile.timesDied > TasksTracker.timesDied)
+         {
+            TasksTracker.timesDied = SaveFile.timesDied;
+         }
+         if(SaveFile.timesWarped > TasksTracker.timesWarped)
+         {
+            TasksTracker.timesWarped = SaveFile.timesWarped;
+         }
+         if(SaveFile.levelsCompleted > TasksTracker.levelsCompleted)
+         {
+            TasksTracker.levelsCompleted = SaveFile.levelsCompleted;
+         }
+         TasksTracker.visible = true;
+      }
+   }
+}

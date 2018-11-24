@@ -1,0 +1,122 @@
+package dee.moly.warp.utils
+{
+   import org.flixel.FlxSave;
+   public class SaveFile
+   {
+      private static var _save:FlxSave;
+      private static var _temp:int = 0;
+      private static var _loaded:Boolean = false;
+      public function SaveFile()
+      {
+         super();
+      }
+      public static function get currentLevel() : int
+      {
+         if(_loaded)
+         {
+            return _save.data.currentLevel;
+         }
+         return _temp;
+      }
+      public static function set currentLevel(param1:int) : void
+      {
+         if(_loaded)
+         {
+            _save.data.currentLevel = param1;
+         }
+         else
+         {
+            _temp = param1;
+         }
+      }
+      public static function get timesWarped() : int
+      {
+         if(_loaded)
+         {
+            return _save.data.timesWarped;
+         }
+         return 0;
+      }
+      public static function set timesWarped(param1:int) : void
+      {
+         if(_loaded)
+         {
+            _save.data.timesWarped = param1;
+         }
+      }
+      public static function get timesDied() : int
+      {
+         if(_loaded)
+         {
+            return _save.data.timesDied;
+         }
+         return 0;
+      }
+      public static function set timesDied(param1:int) : void
+      {
+         if(_loaded)
+         {
+            _save.data.timesDied = param1;
+         }
+      }
+      public static function get enemiesKilled() : int
+      {
+         if(_loaded)
+         {
+            return _save.data.enemiesKilled;
+         }
+         return 0;
+      }
+      public static function set enemiesKilled(param1:int) : void
+      {
+         if(_loaded)
+         {
+            _save.data.enemiesKilled = param1;
+         }
+      }
+      public static function get levelsCompleted() : int
+      {
+         if(_loaded)
+         {
+            return _save.data.levelsCompleted;
+         }
+         return 0;
+      }
+      public static function set levelsCompleted(param1:int) : void
+      {
+         if(_loaded)
+         {
+            _save.data.levelsCompleted = param1;
+         }
+      }
+      public static function load() : void
+      {
+         _save = new FlxSave();
+         _loaded = _save.bind("warpSaveData4");
+         if(!_loaded)
+         {
+            return;
+         }
+         if(_save.data.currentLevel == null)
+         {
+            _save.data.currentLevel = 0;
+         }
+         if(_save.data.timesWarped == null)
+         {
+            _save.data.timesWarped = 0;
+         }
+         if(_save.data.timesDied == null)
+         {
+            _save.data.timesDied = 0;
+         }
+         if(_save.data.enemiesKilled == null)
+         {
+            _save.data.enemiesKilled = 0;
+         }
+         if(_save.data.levelsCompleted == null)
+         {
+            _save.data.levelsCompleted = 0;
+         }
+      }
+   }
+}

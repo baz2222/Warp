@@ -1,0 +1,207 @@
+package dee.moly.warp.game.actors
+{
+   import content.Content;
+   import dee.moly.warp.animations.Animation;
+   import dee.moly.warp.animations.BombTrailAnimation;
+   import dee.moly.warp.animations.JumpTrailAnimation;
+   import dee.moly.warp.animations.PlayerAnimation;
+   import dee.moly.warp.animations.ShieldTrailAnimation;
+   import dee.moly.warp.game.scenery.Tilemap;
+   import dee.moly.warp.game.states.LevelState;
+   import dee.moly.warp.game.tasks.TasksTracker;
+   import org.flixel.FlxG;
+   import org.flixel.FlxGroup;
+   import org.flixel.FlxSprite;
+   public class Player extends Actor
+   {
+      private var _trail:FlxGroup;
+      public var invincible:Boolean;
+      public var explosive:Boolean;
+      public var jumpMultiplier:Boolean;
+      private var _wasOnFloor:Boolean;
+      private var counter:int = 0;
+      private var _warpCount:int = 0;
+      public function Player(param1:LevelState)
+      {
+         super(0,0,param1);
+         var _loc2_:Animation = new PlayerAnimation();
+         _loc2_.init(this);
+         facing = RIGHT;
+         drag.x = RUN_SPEED * 8;
+         this._trail = new FlxGroup();
+         _level.add(this._trail);
+      }
+      override protected function updateGraphics() : void
+      {
+         var _loc1_:FlxSprite = null;
+         super.updateGraphics();
+         if(this.jumpMultiplier)
+         {
+            if(this.counter++ > 3)
+            {
+               _loc1_ = new FlxSprite(x - 10,y - 4);
+               new JumpTrailAnimation().init(_loc1_);
+               this._trail.add(_loc1_);
+               this.counter = 0;
+            }
+            for each(_loc1_ in this._trail.members)
+            {
+               if(_loc1_.finished)
+               {
+                  _loc1_.exists = false;
+               }
+            }
+         }
+         if(this.invincible)
+         {
+            if(this.counter++ > 3)
+            {
+               _loc1_ = new FlxSprite(x - 10,y - 4);
+               new ShieldTrailAnimation().init(_loc1_);
+               this._trail.add(_loc1_);
+               this.counter = 0;
+            }
+            for each(_loc1_ in this._trail.members)
+            {
+               if(_loc1_.finished)
+               {
+                  _loc1_.exists = false;
+               }
+            }
+         }
+         if(this.explosive)
+         {
+            if(this.counter++ > 3)
+            {
+               _loc1_ = new FlxSprite(x - 10,y - 4);
+               new BombTrailAnimation().init(_loc1_);
+               this._trail.add(_loc1_);
+               this.counter = 0;
+            }
+            for each(_loc1_ in this._trail.members)
+            {
+               if(_loc1_.finished)
+               {
+                  _loc1_.exists = false;
+               }
+            }
+         }
+      }
+      override protected function handleInput() : void
+      {
+         super.handleInput();
+         if(dead)
+         {
+            return;
+         }
+         if(FlxG.keys.LEFT || FlxG.keys.A)
+         {
+            velocity.x = -RUN_SPEED;
+            facing = FlxSprite.LEFT;
+         }
+         else if(FlxG.keys.RIGHT || FlxG.keys.D)
+         {
+            velocity.x = RUN_SPEED;
+            facing = FlxSprite.RIGHT;
+         }
+         if(onFloor && !this._wasOnFloor)
+         {
+            FlxG.play(Content.LandSound,0.5);
+            this._wasOnFloor = true;
+         }
+         if(!onFloor)
+         {
+            this._wasOnFloor = false;
+         }
+         if((FlxG.keys.justPressed("UP") || FlxG.keys.justPressed("W")) && onFloor)
+         {
+            velocity.y = -JUMP_POWER * (!!this.jumpMultiplier?1.5:1);
+            FlxG.play(Content.JumpSound,0.5);
+            if(this.jumpMultiplier)
+            {
+               FlxG.play(Content.SuperJumpSound,0.3);
+            }
+         }
+      }
+      override protected function updateCollisions() : void
+      {
+         if(y <= 0 - height && dead)
+         {
+            _level.restartLevel();
+         }
+         super.updateCollisions();
+         if(dead)
+         {
+            return;
+         }
+         var _loc1_:FlxSprite = new FlxSprite();
+         _loc1_.width = Tilemap.TILE_WIDTH;
+         _loc1_.height = Tilemap.TILE_HEIGHT - 10;
+         _loc1_.fixed = true;
+         if(_level.getTile((x - 1) / Tilemap.TILE_WIDTH,(y + height - 10) / Tilemap.TILE_HEIGHT) == Tilemap.SPIKE_TILE)
+         {
+            _loc1_.x = int((x - 1) / Tilemap.TILE_WIDTH) * Tilemap.TILE_WIDTH;
+            _loc1_.y = int((y - 10 + height) / Tilemap.TILE_HEIGHT) * Tilemap.TILE_HEIGHT + 10;
+            _loc1_.refreshHulls();
+            collide(_loc1_);
+         }
+         if(_level.getTile((x - 1) / Tilemap.TILE_WIDTH,(y + 1) / Tilemap.TILE_HEIGHT) == Tilemap.SPIKE_TILE)
+         {
+            _loc1_.x = int((x - 1) / Tilemap.TILE_WIDTH) * Tilemap.TILE_WIDTH;
+            _loc1_.y = int((y + 1) / Tilemap.TILE_HEIGHT) * Tilemap.TILE_HEIGHT + 10;
+            _loc1_.refreshHulls();
+            collide(_loc1_);
+         }
+         if(_level.getTile((x + width) / Tilemap.TILE_WIDTH,(y + height - 10) / Tilemap.TILE_HEIGHT) == Tilemap.SPIKE_TILE)
+         {
+            _loc1_.x = int((x + width) / Tilemap.TILE_WIDTH) * Tilemap.TILE_WIDTH;
+            _loc1_.y = int((y - 10 + height) / Tilemap.TILE_HEIGHT) * Tilemap.TILE_HEIGHT + 10;
+            _loc1_.refreshHulls();
+            collide(_loc1_);
+         }
+         if(_level.getTile((x + width) / Tilemap.TILE_WIDTH,(y + 1) / Tilemap.TILE_HEIGHT) == Tilemap.SPIKE_TILE)
+         {
+            _loc1_.x = int((x + width) / Tilemap.TILE_WIDTH) * Tilemap.TILE_WIDTH;
+            _loc1_.y = int((y + 1) / Tilemap.TILE_HEIGHT) * Tilemap.TILE_HEIGHT + 10;
+            _loc1_.refreshHulls();
+            collide(_loc1_);
+         }
+         if(_level.getTile(x / 16,(y + height - 3) / 16) == Tilemap.SPIKE_TILE || _level.getTile((x + width - 1) / 16,(y + height - 3) / 16) == Tilemap.SPIKE_TILE)
+         {
+            this.kill();
+         }
+      }
+      override public function reset(param1:Number, param2:Number) : void
+      {
+         super.reset(param1,param2);
+         solid = true;
+         this._trail.destroy();
+         acceleration.y = GRAVITY;
+         this.jumpMultiplier = false;
+         this.invincible = false;
+         this.explosive = false;
+         color = 16777215;
+         this._warpCount = 0;
+      }
+      override public function kill() : void
+      {
+         super.kill();
+         FlxG.play(Content.AngleSound);
+         this._trail.destroy();
+         this.jumpMultiplier = false;
+         this.invincible = false;
+         this.explosive = false;
+         color = 16777215;
+         TasksTracker.timesDied++;
+      }
+      override protected function warp(param1:int, param2:int) : void
+      {
+         super.warp(param1,param2);
+         this._warpCount++;
+         if(FlxG.level == 22 && this._warpCount >= 10)
+         {
+            _level.door.exists = true;
+         }
+         TasksTracker.timesWarped++;
+      }
+   }

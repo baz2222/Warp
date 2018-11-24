@@ -1,0 +1,28 @@
+package dee.moly.warp.game.props
+{
+   import content.Content;
+   import dee.moly.warp.animations.Animation;
+   import dee.moly.warp.animations.BumpAnimation;
+   import dee.moly.warp.game.GameObject;
+   import dee.moly.warp.game.states.LevelState;
+   import org.flixel.FlxG;
+   public class Bump extends GameObject
+   {
+      public function Bump(param1:int, param2:int, param3:LevelState)
+      {
+         super(param1,param2,param3);
+         var _loc4_:Animation = new BumpAnimation();
+         _loc4_.init(this);
+      }
+      override public function update() : void
+      {
+         super.update();
+         if(overlaps(_level.player) && _level.player.onFloor && (FlxG.keys.justPressed("Z") || FlxG.keys.justPressed("DOWN")))
+         {
+            _level.player.velocity.y = -500;
+            play(BumpAnimation.BOUNCE_ANIMATION,true);
+            FlxG.play(Content.SuperJumpSound);
+         }
+      }
+   }
+}

@@ -1,0 +1,15 @@
+package dee.moly.warp.game.actors
+{
+   import dee.moly.warp.animations.Animation;
+   import dee.moly.warp.animations.SpikeEnemyAnimation;
+   import dee.moly.warp.game.states.LevelState;
+   public class SpikeEnemy extends Enemy
+   {
+      public function SpikeEnemy(param1:int, param2:int, param3:LevelState)
+      {
+         super(param1,param2,param3);
+         var _loc4_:Animation = new SpikeEnemyAnimation();
+         _loc4_.init(this);
+      }
+   }
+}

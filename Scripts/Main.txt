@@ -1,0 +1,16 @@
+package dee.moly.warp
+{
+   import content.Content;
+   import dee.moly.warp.game.Pause;
+   import dee.moly.warp.game.states.SponsorSplashState;
+   import org.flixel.FlxGame;
+   public class Main extends FlxGame
+   {
+      public function Main()
+      {
+         super(480,272,SponsorSplashState,1);
+         this.pause = new Pause();
+         this.addFrame(Content.Border,14,14);
+      }
+   }
+}
